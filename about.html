@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Story - Doomsage</title>
+<meta name="description" content="How this site was designed, coded, pushed, deployed, and then expanded, all by an AI assistant.">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body {
+    margin: 0;
+    background: #0a0a14;
+    color: #f5f2ff;
+    font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
+  }
+  .layer { position: relative; z-index: 2; }
+
+  .hero {
+    min-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 24px;
+    background:
+      radial-gradient(60vw 40vh at 20% 10%, rgba(139,92,246,.18), transparent 70%),
+      radial-gradient(50vw 36vh at 85% 25%, rgba(34,230,255,.12), transparent 70%),
+      radial-gradient(70vw 50vh at 50% 100%, rgba(255,46,136,.1), transparent 70%);
+  }
+  .hero h1 {
+    font-size: clamp(38px, 8vw, 96px);
+    letter-spacing: .14em;
+    font-weight: 800;
+    line-height: 1.08;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, #ff9a62, #ff5e9c, #8b5cf6, #22e6ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p {
+    margin-top: 20px;
+    max-width: 560px;
+    line-height: 1.8;
+    color: #b9b3d4;
+    font-size: 15.5px;
+  }
+
+  /* timeline */
+  .timeline {
+    position: relative;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 10vh 24px 12vh;
+  }
+  .tl-line {
+    position: absolute;
+    left: 50%;
+    top: 0; bottom: 0;
+    width: 2px;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,.08);
+  }
+  .tl-fill {
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%; height: 0;
+    background: linear-gradient(#ff9a62, #ff5e9c, #8b5cf6, #22e6ff);
+    box-shadow: 0 0 14px rgba(139,92,246,.8);
+  }
+  .tl-item {
+    position: relative;
+    width: calc(50% - 44px);
+    padding: 26px 28px;
+    margin-bottom: 9vh;
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 16px;
+    backdrop-filter: blur(4px);
+  }
+  .tl-item:nth-child(odd) { margin-left: 0; }
+  .tl-item:nth-child(even) { margin-left: calc(50% + 44px); }
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    top: 32px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #22e6ff;
+    box-shadow: 0 0 16px #22e6ff;
+  }
+  .tl-item:nth-child(odd)::before { right: -50px; }
+  .tl-item:nth-child(even)::before { left: -50px; }
+  .tl-item .step {
+    font-size: 11px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: #22e6ff;
+  }
+  .tl-item h3 {
+    margin: 8px 0 10px;
+    font-size: 21px;
+    letter-spacing: .08em;
+  }
+  .tl-item p { color: #b9b3d4; line-height: 1.75; font-size: 14.5px; }
+
+  /* stats */
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5vw;
+    padding: 6vh 24px 12vh;
+    text-align: center;
+  }
+  .stat .num {
+    display: block;
+    font-size: clamp(40px, 7vw, 76px);
+    font-weight: 800;
+    background: linear-gradient(180deg, #fff, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stat .lbl {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: #9a94b3;
+    max-width: 200px;
+  }
+
+  .credits {
+    text-align: center;
+    padding: 0 24px 14vh;
+  }
+  .credits h2 { font-size: clamp(26px, 5vw, 52px); letter-spacing: .16em; margin-bottom: 16px; }
+  .credits p { color: #b9b3d4; line-height: 1.8; max-width: 520px; margin: 0 auto 26px; }
+  .credits a.btn {
+    display: inline-block;
+    padding: 14px 34px;
+    border: 1px solid rgba(255,255,255,.4);
+    border-radius: 999px;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: .26em;
+    font-size: 12px;
+    text-transform: uppercase;
+    transition: background .3s, color .3s, box-shadow .3s;
+  }
+  .credits a.btn:hover { background: #fff; color: #0a0a14; box-shadow: 0 0 34px rgba(255,255,255,.4); }
+
+  @media (max-width: 720px) {
+    .tl-line { left: 14px; transform: none; }
+    .tl-item, .tl-item:nth-child(even) { width: auto; margin-left: 44px; }
+    .tl-item:nth-child(odd)::before, .tl-item:nth-child(even)::before { left: -37px; right: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <a class="brand" href="index.html">&#x2726; DOOMSAGE</a>
+  <nav class="links">
+    <a href="index.html">Home</a>
+    <a href="sky.html">Sky</a>
+    <a href="stars.html">Stars</a>
+    <a href="door.html">Door</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main class="layer">
+
+  <section class="hero">
+    <h1>ONE PROMPT.<br><em>ZERO HANDS.</em></h1>
+    <p>This site exists because a human typed a sentence and an AI did everything after. Then the human asked for more, so the AI came back and built the sky, the stars, and a door. This page is the receipt.</p>
+  </section>
+
+  <section class="timeline" id="timeline">
+    <div class="tl-line"><div class="tl-fill" id="tlFill"></div></div>
+
+    <article class="tl-item rv rv-left">
+      <span class="step">Phase 01</span>
+      <h3>The Ask</h3>
+      <p>28 September 2026. The human said: build a page, make it anime, ship it yourself. No repo, no design file, no spec. Just vibes and permission.</p>
+    </article>
+    <article class="tl-item rv rv-right">
+      <span class="step">Phase 02</span>
+      <h3>The Design</h3>
+      <p>Palette, type scale, and motion composed from scratch. Neon pink, cyan, violet on near-black. Canvas particles, cursor glow, scroll reveals. No template was harmed or used.</p>
+    </article>
+    <article class="tl-item rv rv-left">
+      <span class="step">Phase 03</span>
+      <h3>The Code</h3>
+      <p>Three files: index.html, style.css, script.js. Zero dependencies, zero CDNs, zero build step. Every pixel accounted for, every line written by the model.</p>
+    </article>
+    <article class="tl-item rv rv-right">
+      <span class="step">Phase 04</span>
+      <h3>The Push</h3>
+      <p>A brand new GitHub repo under @doomsage, created and populated through the browser. The files briefly wore numbered name tags before being renamed to their proper selves. Nobody talks about that.</p>
+    </article>
+    <article class="tl-item rv rv-left">
+      <span class="step">Phase 05</span>
+      <h3>The Deploy</h3>
+      <p>Imported into Vercel and shipped to production on a Hobby plan. Push to main, auto-deploy, live URL. The page you are reading is served by that pipeline right now.</p>
+    </article>
+    <article class="tl-item rv rv-right">
+      <span class="step">Phase 06</span>
+      <h3>The Expansion</h3>
+      <p>Same day, second request: more pages, more animation, full Suzume. So the site grew a sky that scrolls through a whole day, a starfield with self-drawing constellations, and a door standing alone in a field.</p>
+    </article>
+  </section>
+
+  <section class="stats">
+    <div class="stat rv"><span class="num" data-count="8">0</span><span class="lbl">files, all hand-written by the model</span></div>
+    <div class="stat rv rv-d1"><span class="num" data-count="5">0</span><span class="lbl">pages live on this site</span></div>
+    <div class="stat rv rv-d2"><span class="num" data-count="0">0</span><span class="lbl">external images or libraries</span></div>
+    <div class="stat rv rv-d3"><span class="num" data-count="100">0</span><span class="lbl">percent agent-built</span></div>
+  </section>
+
+  <section class="credits">
+    <h2 class="rv rv-zoom">GO LOOK AT THE SKY.</h2>
+    <p class="rv rv-d1">The whole point of the expansion is one click away. The sky page runs a full day cycle while you scroll.</p>
+    <a class="btn rv rv-d2" href="sky.html">Enter the sky &#x2192;</a>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>conceived, written, and shipped by Doomsage&rsquo;s AI &#x2726; the human just asked</p>
+  <p style="margin-top:8px; opacity:.7;">html &middot; css &middot; js &middot; github &middot; vercel &middot; all agent-driven</p>
+</footer>
+
+<script src="shared.js"></script>
+<script>
+(function () {
+  // timeline progress fill
+  var tl = document.getElementById('timeline');
+  var fill = document.getElementById('tlFill');
+  function onScroll() {
+    var r = tl.getBoundingClientRect();
+    var total = r.height - innerHeight * 0.5;
+    var passed = Math.min(Math.max(-r.top + innerHeight * 0.5, 0), Math.max(total, 1));
+    fill.style.height = (passed / Math.max(total, 1) * 100) + '%';
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // count-up stats
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      var el = e.target;
+      var target = parseInt(el.getAttribute('data-count'), 10);
+      if (target === 0) { el.textContent = '0'; return; }
+      var t0 = performance.now();
+      var dur = 1400;
+      (function tick(now) {
+        var f = Math.min(1, (now - t0) / dur);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - f, 3)));
+        if (f < 1) requestAnimationFrame(tick);
+      })(t0);
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('.num[data-count]').forEach(function (el) { io.observe(el); });
+})();
+</script>
+</body>
+</html>
