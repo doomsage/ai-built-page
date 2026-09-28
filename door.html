@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Door - Doomsage</title>
+<meta name="description" content="A lone door standing in a field under a huge sky, Suzume style. Click it open.">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body {
+    margin: 0;
+    color: #fff;
+    font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
+    background: linear-gradient(#79b7e8 0%, #a8d4f0 34%, #ffd9a8 62%, #7fae6e 62.2%, #4d7a4a 100%);
+    min-height: 100vh;
+  }
+
+  .scene {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  /* sun */
+  .sun {
+    position: absolute;
+    top: 12%; right: 14%;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fffbe8, #ffe9a8 55%, rgba(255,220,140,0) 72%);
+    filter: blur(1px);
+    animation: sunPulse 6s ease-in-out infinite;
+  }
+  @keyframes sunPulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.06);} }
+
+  /* drifting clouds (CSS) */
+  .cloud {
+    position: absolute;
+    background: rgba(255,255,255,.92);
+    border-radius: 999px;
+    filter: blur(2px);
+    opacity: .9;
+    animation: drift linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: "";
+    position: absolute;
+    background: inherit;
+    border-radius: 50%;
+  }
+  .cloud.c1 { width: 190px; height: 44px; top: 16%; animation-duration: 90s; }
+  .cloud.c1::before { width: 80px; height: 80px; top: -38px; left: 28px; }
+  .cloud.c1::after { width: 60px; height: 60px; top: -26px; left: 96px; }
+  .cloud.c2 { width: 140px; height: 34px; top: 30%; animation-duration: 120s; animation-delay: -40s; opacity: .75; }
+  .cloud.c2::before { width: 60px; height: 60px; top: -28px; left: 20px; }
+  .cloud.c2::after { width: 44px; height: 44px; top: -18px; left: 70px; }
+  .cloud.c3 { width: 230px; height: 50px; top: 8%; animation-duration: 150s; animation-delay: -90s; opacity: .6; }
+  .cloud.c3::before { width: 90px; height: 90px; top: -44px; left: 40px; }
+  .cloud.c3::after { width: 70px; height: 70px; top: -30px; left: 120px; }
+  @keyframes drift {
+    from { transform: translateX(-30vw); }
+    to { transform: translateX(115vw); }
+  }
+
+  /* mountains */
+  .mountains {
+    position: absolute;
+    left: 0; right: 0; top: 44%;
+    height: 20vh;
+    background:
+      radial-gradient(60vw 22vh at 18% 100%, rgba(90,110,160,.55), transparent 70%),
+      radial-gradient(70vw 26vh at 55% 100%, rgba(70,90,140,.65), transparent 70%),
+      radial-gradient(55vw 20vh at 88% 100%, rgba(90,110,160,.5), transparent 70%);
+    pointer-events: none;
+  }
+
+  /* grass blades foreground */
+  .grass {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 12vh;
+    background: repeating-linear-gradient(100deg, transparent 0 14px, rgba(30,60,30,.18) 14px 16px);
+    pointer-events: none;
+  }
+
+  /* THE DOOR */
+  .door-wrap {
+    position: absolute;
+    left: 50%;
+    bottom: 16vh;
+    transform: translateX(-50%);
+    perspective: 900px;
+    cursor: pointer;
+    z-index: 5;
+  }
+  .door-frame {
+    width: 180px;
+    height: 320px;
+    padding: 12px;
+    background: linear-gradient(160deg, #8a6a4f, #6b4f38);
+    border-radius: 90px 90px 6px 6px;
+    box-shadow: 0 0 0 4px rgba(60,40,25,.5), 0 30px 60px rgba(20,30,20,.45);
+    position: relative;
+  }
+  .door-frame::before {
+    /* the glow leaking around the door */
+    content: "";
+    position: absolute;
+    inset: -26px;
+    border-radius: 120px 120px 20px 20px;
+    background: radial-gradient(ellipse at 50% 60%, rgba(255,240,190,.55), rgba(255,210,140,.18) 55%, transparent 75%);
+    animation: leak 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes leak { 0%,100% { opacity:.55;} 50% { opacity:1;} }
+  .door-leaf {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(150deg, #a9815e 0%, #8a6547 55%, #75553c 100%);
+    border-radius: 80px 80px 4px 4px;
+    transform-origin: left center;
+    transition: transform 1.6s cubic-bezier(.6,.05,.2,1);
+    position: relative;
+    box-shadow: inset 0 0 0 3px rgba(50,35,22,.35);
+    backface-visibility: hidden;
+  }
+  .door-leaf::before, .door-leaf::after {
+    content: "";
+    position: absolute;
+    left: 18%; right: 18%;
+    border: 3px solid rgba(52,36,24,.4);
+    border-radius: 40px 40px 4px 4px;
+  }
+  .door-leaf::before { top: 8%; height: 40%; }
+  .door-leaf::after { top: 56%; height: 34%; border-radius: 6px; }
+  .knob {
+    position: absolute;
+    right: 12%;
+    top: 52%;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffe9a8, #b98a3c);
+    box-shadow: 0 0 8px rgba(255,220,140,.9);
+  }
+  .beyond {
+    position: absolute;
+    inset: 12px;
+    border-radius: 80px 80px 4px 4px;
+    background:
+      radial-gradient(circle at 50% 30%, #ffffff, #cfe8ff 30%, #7fb7ef 60%, #3d6fc4 100%);
+    opacity: 0;
+    transition: opacity 1.2s ease .5s;
+    overflow: hidden;
+  }
+  .beyond::before {
+    /* stars inside the beyond */
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+      radial-gradient(1.6px 1.6px at 70% 20%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 45% 60%, #fff, transparent),
+      radial-gradient(2px 2px at 80% 70%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 30% 80%, #fff, transparent),
+      radial-gradient(1.8px 1.8px at 60% 45%, #fff, transparent);
+    animation: twinkle 2.4s ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%,100% { opacity:1;} 50% { opacity:.4;} }
+  .door-wrap.open .door-leaf { transform: rotateY(-104deg); }
+  .door-wrap.open .beyond { opacity: 1; }
+
+  .door-shadow {
+    position: absolute;
+    left: 50%;
+    bottom: 15vh;
+    transform: translateX(-50%);
+    width: 240px; height: 26px;
+    background: radial-gradient(ellipse, rgba(20,35,20,.5), transparent 70%);
+    z-index: 4;
+  }
+
+  .door-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 8vh;
+    transform: translateX(-50%);
+    font-size: 11px;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 1px 10px rgba(0,0,0,.5);
+    animation: cue2 2.4s ease-in-out infinite;
+    z-index: 6;
+    white-space: nowrap;
+  }
+  @keyframes cue2 { 0%,100% { opacity:.65;} 50% { opacity:1;} }
+
+  /* light burst on open */
+  .burst {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 50% 55%, #fff, rgba(255,250,230,.85) 30%, transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.4s ease;
+    z-index: 40;
+  }
+  .burst.on { opacity: 1; }
+
+  .hero-copy {
+    position: relative;
+    z-index: 6;
+    text-align: center;
+    padding-top: 16vh;
+    pointer-events: none;
+  }
+  .hero-copy h1 {
+    font-size: clamp(36px, 7.5vw, 92px);
+    letter-spacing: .2em;
+    font-weight: 800;
+    text-shadow: 0 4px 40px rgba(20,40,80,.45);
+  }
+  .hero-copy p {
+    margin-top: 10px;
+    font-size: 12px;
+    letter-spacing: .4em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 12px rgba(20,40,80,.5);
+  }
+
+  /* petals canvas */
+  #petals { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
+
+  /* story sections */
+  .story {
+    position: relative;
+    z-index: 8;
+    background: linear-gradient(#0b1026, #131a3d 60%, #0b1026);
+    padding: 14vh 8vw 10vh;
+  }
+  .story .row {
+    max-width: 640px;
+    margin: 0 auto 16vh;
+  }
+  .story .row:nth-child(even) { text-align: right; }
+  .story h2 {
+    font-size: clamp(26px, 4.5vw, 46px);
+    letter-spacing: .12em;
+    margin-bottom: 16px;
+    color: #ffe9c9;
+  }
+  .story p { line-height: 1.85; color: #cdd4f5; font-size: 15.5px; }
+  .story .go {
+    display: inline-block;
+    margin-top: 22px;
+    padding: 13px 32px;
+    border: 1px solid rgba(255,233,201,.5);
+    border-radius: 999px;
+    color: #ffe9c9;
+    text-decoration: none;
+    letter-spacing: .26em;
+    font-size: 12px;
+    text-transform: uppercase;
+    transition: background .3s, color .3s, box-shadow .3s;
+  }
+  .story .go:hover { background: #ffe9c9; color: #131a3d; box-shadow: 0 0 34px rgba(255,233,201,.45); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <a class="brand" href="index.html">&#x2726; DOOMSAGE</a>
+  <nav class="links">
+    <a href="index.html">Home</a>
+    <a href="sky.html">Sky</a>
+    <a href="stars.html">Stars</a>
+    <a href="door.html">Door</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<section class="scene" id="scene">
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="mountains"></div>
+
+  <div class="hero-copy">
+    <h1 class="rv rv-zoom on">THE DOOR</h1>
+    <p class="rv rv-d1 on">something is glowing on the other side</p>
+  </div>
+
+  <div class="door-shadow"></div>
+  <div class="door-wrap" id="door" role="button" tabindex="0" aria-label="Open the door">
+    <div class="door-frame">
+      <div class="beyond"></div>
+      <div class="door-leaf"><span class="knob"></span></div>
+    </div>
+  </div>
+  <div class="door-hint" id="hint">click the door</div>
+  <canvas id="petals"></canvas>
+  <div class="grass"></div>
+  <div class="burst" id="burst"></div>
+</section>
+
+<section class="story">
+  <div class="row rv rv-left">
+    <h2>DOORS IN FIELDS</h2>
+    <p>In Suzume, doors stand alone in abandoned places, and behind them burns a sky that does not belong to our world. Closing them is a duty. Opening them is a mistake. Either way, you cannot walk past one without stopping.</p>
+  </div>
+  <div class="row rv rv-right">
+    <h2>THIS ONE OPENS</h2>
+    <p>No earthquakes here, no keystone, no cat with opinions. This door was drawn with CSS gradients and opens with a click. What is on the other side is just more sky, but that was always the point.</p>
+  </div>
+  <div class="row rv rv-left">
+    <h2>CLOSE IT BEHIND YOU</h2>
+    <p>Every door is a goodbye to somewhere. When you are done looking, scroll on. The stars page is one door over, and it never needs locking.</p>
+    <a class="go" href="stars.html">Step through &#x2192;</a>
+  </div>
+</section>
+
+<footer class="site-footer" style="background:#0b1026;">
+  <p>one div door, zero images &#x2726; <a href="index.html">back home</a></p>
+</footer>
+
+<script src="shared.js"></script>
+<script>
+(function () {
+  var door = document.getElementById('door');
+  var burst = document.getElementById('burst');
+  var hint = document.getElementById('hint');
+  function toggle() {
+    var opening = !door.classList.contains('open');
+    door.classList.toggle('open');
+    hint.textContent = opening ? 'click again to close it' : 'click the door';
+    if (opening) {
+      burst.classList.add('on');
+      setTimeout(function () { burst.classList.remove('on'); }, 700);
+    }
+  }
+  door.addEventListener('click', toggle);
+  door.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+  });
+
+  // petals / grass seeds drifting across the scene
+  var cv = document.getElementById('petals');
+  var ctx = cv.getContext('2d');
+  var scene = document.getElementById('scene');
+  var W, H;
+  function resize() {
+    W = cv.width = scene.clientWidth;
+    H = cv.height = scene.clientHeight;
+  }
+  resize();
+  addEventListener('resize', resize);
+
+  var petals = [];
+  for (var i = 0; i < 42; i++) {
+    petals.push({
+      x: Math.random(), y: Math.random(),
+      r: 2 + Math.random() * 3.4,
+      vx: 0.00025 + Math.random() * 0.0005,
+      ph: Math.random() * 6.283,
+      spin: Math.random() * 6.283,
+      warm: Math.random() < 0.5
+    });
+  }
+  function frame(now) {
+    var t = now / 1000;
+    ctx.clearRect(0, 0, W, H);
+    petals.forEach(function (p) {
+      p.x += p.vx;
+      if (p.x > 1.05) p.x = -0.05;
+      var px = p.x * W;
+      var py = p.y * H + Math.sin(t * 1.2 + p.ph) * 22;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(t * 0.8 + p.spin);
+      ctx.fillStyle = p.warm ? 'rgba(255,214,170,0.85)' : 'rgba(255,246,235,0.85)';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.r, p.r * 0.55, 0, 0, 6.2832);
+      ctx.fill();
+      ctx.restore();
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
