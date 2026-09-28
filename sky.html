@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sky Remembers - Doomsage</title>
+<meta name="description" content="A Makoto Shinkai style sky: scroll to move time from morning to night. Drawn entirely with canvas.">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body {
+    margin: 0;
+    color: #fff;
+    font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
+    background: #0b1026;
+  }
+  #skyCanvas { position: fixed; inset: 0; z-index: 0; }
+  .layer { position: relative; z-index: 2; }
+
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 24px;
+  }
+  .hero h1 {
+    font-size: clamp(42px, 9vw, 110px);
+    letter-spacing: .12em;
+    font-weight: 800;
+    text-shadow: 0 4px 40px rgba(0,0,0,.35);
+    animation: heroFloat 7s ease-in-out infinite;
+  }
+  .hero p {
+    margin-top: 18px;
+    font-size: clamp(13px, 1.6vw, 17px);
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    opacity: .9;
+    text-shadow: 0 2px 18px rgba(0,0,0,.4);
+  }
+  @keyframes heroFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  .scroll-cue {
+    position: absolute;
+    bottom: 34px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    opacity: .85;
+    animation: cue 2.2s ease-in-out infinite;
+  }
+  @keyframes cue { 0%,100% { transform: translate(-50%,0);} 50% { transform: translate(-50%,10px);} }
+
+  section.moment {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 0 8vw;
+  }
+  section.moment:nth-child(even) { justify-content: flex-end; text-align: right; }
+  .card-sky {
+    max-width: 460px;
+    padding: 34px 36px;
+    background: rgba(10, 12, 30, .28);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 18px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  }
+  .card-sky h2 {
+    font-size: clamp(26px, 4vw, 40px);
+    letter-spacing: .1em;
+    margin-bottom: 14px;
+  }
+  .card-sky p { line-height: 1.75; font-size: 15px; opacity: .94; }
+  .card-sky .time {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 11px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid rgba(255,255,255,.4);
+    border-radius: 999px;
+  }
+
+  .finale {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 22px;
+    padding: 0 24px;
+  }
+  .finale h2 { font-size: clamp(30px, 6vw, 64px); letter-spacing: .14em; }
+  .finale a.btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 14px 34px;
+    border: 1px solid rgba(255,255,255,.6);
+    border-radius: 999px;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: .26em;
+    font-size: 12px;
+    text-transform: uppercase;
+    transition: background .3s, color .3s, box-shadow .3s;
+  }
+  .finale a.btn:hover { background: #fff; color: #1a1440; box-shadow: 0 0 40px rgba(255,255,255,.5); }
+</style>
+</head>
+<body>
+
+<canvas id="skyCanvas"></canvas>
+
+<header class="topnav">
+  <a class="brand" href="index.html">&#x2726; DOOMSAGE</a>
+  <nav class="links">
+    <a href="index.html">Home</a>
+    <a href="sky.html">Sky</a>
+    <a href="stars.html">Stars</a>
+    <a href="door.html">Door</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main class="layer">
+
+  <section class="hero">
+    <h1 class="rv rv-zoom on">THE SKY<br>REMEMBERS</h1>
+    <p class="rv rv-d1 on">scroll, and the day will pass</p>
+    <div class="scroll-cue">morning waits below &#x2193;</div>
+  </section>
+
+  <section class="moment" id="m1">
+    <div class="card-sky rv rv-left">
+      <span class="time">07:00 - morning</span>
+      <h2>MORNING BLUE</h2>
+      <p>The kind of blue that only exists in animation cels and real Augusts. Clouds drift like they have nowhere to be, and the light is still deciding what kind of day this will be.</p>
+    </div>
+  </section>
+
+  <section class="moment" id="m2">
+    <div class="card-sky rv rv-right">
+      <span class="time">12:00 - midday</span>
+      <h2>HIGH LIGHT</h2>
+      <p>Cumulus towers stack up over the city. Everything is overexposed, washed in white, the way Shinkai paints noon: too bright to look at, too beautiful to look away.</p>
+    </div>
+  </section>
+
+  <section class="moment" id="m3">
+    <div class="card-sky rv rv-left">
+      <span class="time">17:30 - golden hour</span>
+      <h2>GOLDEN HOUR</h2>
+      <p>The sun drops and the whole world turns to honey. Light rays lean through the gaps in the clouds. This is the hour every train window in every film is waiting for.</p>
+    </div>
+  </section>
+
+  <section class="moment" id="m4">
+    <div class="card-sky rv rv-right">
+      <span class="time">19:00 - dusk</span>
+      <h2>VIOLET DUSK</h2>
+      <p>Orange gives up to pink, pink gives up to violet. The clouds catch fire one last time. Somewhere below, a door is waiting to be closed.</p>
+    </div>
+  </section>
+
+  <section class="moment" id="m5">
+    <div class="card-sky rv rv-left">
+      <span class="time">22:00 - night</span>
+      <h2>FIRST STARS</h2>
+      <p>The sky deepens into indigo and the first stars come out, shy at first, then everywhere. Keep scrolling and the night fills in behind you.</p>
+    </div>
+  </section>
+
+  <section class="finale">
+    <h2 class="rv rv-zoom">THE DAY IS DONE.</h2>
+    <p class="rv rv-d1" style="letter-spacing:.2em; opacity:.85; text-transform:uppercase; font-size:13px;">but the stars are just getting started</p>
+    <a class="btn rv rv-d2" href="stars.html">Chase the stars &#x2192;</a>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>drawn with canvas gradients &#x2726; zero images &#x2726; <a href="index.html">back home</a></p>
+</footer>
+
+<script src="shared.js"></script>
+<script>
+(function () {
+  var cv = document.getElementById('skyCanvas');
+  var ctx = cv.getContext('2d');
+  var W, H;
+  function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
+  resize();
+  addEventListener('resize', resize);
+
+  // time-of-day palette stops: [pos, top color, mid color, bottom color, sunY(0-1), starAlpha]
+  var STOPS = [
+    [0.00, '#3f8fd2', '#8fc9ef', '#dff1fb', 0.30, 0.0],
+    [0.22, '#2f7fc9', '#7ec3ee', '#eaf6fd', 0.18, 0.0],
+    [0.45, '#7a6fd0', '#e98a7a', '#ffd9a0', 0.55, 0.0],
+    [0.68, '#3a2d6e', '#a04d8e', '#ff9a62', 0.74, 0.05],
+    [0.88, '#131a3d', '#2c2a5e', '#6a4a8a', 0.95, 0.55],
+    [1.00, '#070b1f', '#101736', '#1d2a52', 1.05, 1.0]
+  ];
+
+  function hexRgb(h) {
+    return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+  }
+  function mix(a, b, f) {
+    var A = hexRgb(a), B = hexRgb(b);
+    return 'rgb(' + Math.round(A[0]+(B[0]-A[0])*f) + ',' + Math.round(A[1]+(B[1]-A[1])*f) + ',' + Math.round(A[2]+(B[2]-A[2])*f) + ')';
+  }
+  function paletteAt(t) {
+    var i = 0;
+    while (i < STOPS.length - 2 && t > STOPS[i+1][0]) i++;
+    var s0 = STOPS[i], s1 = STOPS[i+1];
+    var f = Math.min(1, Math.max(0, (t - s0[0]) / (s1[0] - s0[0])));
+    return {
+      top: mix(s0[1], s1[1], f),
+      mid: mix(s0[2], s1[2], f),
+      bot: mix(s0[3], s1[3], f),
+      sunY: s0[4] + (s1[4] - s0[4]) * f,
+      stars: s0[5] + (s1[5] - s0[5]) * f,
+      dusk: Math.min(1, Math.max(0, (t - 0.35) / 0.35)) * (1 - Math.min(1, Math.max(0, (t - 0.8) / 0.15)))
+    };
+  }
+
+  // cloud layers: 3 parallax depths, each a set of blobby clouds
+  var layers = [];
+  var depths = [0.12, 0.3, 0.6];
+  for (var L = 0; L < 3; L++) {
+    var clouds = [];
+    var n = 6 + L * 2;
+    for (var i = 0; i < n; i++) {
+      var puffs = [];
+      var pn = 4 + (Math.random() * 4 | 0);
+      for (var p = 0; p < pn; p++) {
+        puffs.push({ dx: (p - pn/2) * 34 + Math.random()*20, dy: Math.random()*16 - 8, r: 22 + Math.random()*26 });
+      }
+      clouds.push({
+        x: Math.random(), y: 0.08 + Math.random() * 0.55,
+        scale: 0.5 + L * 0.45 + Math.random() * 0.4,
+        speed: 0.00012 + L * 0.00010 + Math.random() * 0.00006,
+        puffs: puffs
+      });
+    }
+    layers.push(clouds);
+  }
+
+  // stars for night
+  var stars = [];
+  for (var s = 0; s < 220; s++) {
+    stars.push({ x: Math.random(), y: Math.random() * 0.8, r: Math.random()*1.3 + .3, ph: Math.random() * 6.28 });
+  }
+  // birds
+  var birds = [];
+  for (var b = 0; b < 7; b++) {
+    birds.push({ x: Math.random(), y: 0.2 + Math.random()*0.35, v: 0.0004 + Math.random()*0.0004, ph: Math.random()*6.28, s: 5 + Math.random()*5 });
+  }
+
+  function drawCloud(c, depthIdx, pal, scroll, time) {
+    var depth = depths[depthIdx];
+    var x = ((c.x + time * c.speed + scroll * depth * 0.6) % 1.3 - 0.15) * W;
+    var y = c.y * H + scroll * depth * 120 - 60;
+    var alpha = 0.5 + depth * 0.55;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, alpha);
+    c.puffs.forEach(function (pf) {
+      var r = pf.r * c.scale;
+      var g = ctx.createRadialGradient(x + pf.dx*c.scale, y + pf.dy*c.scale, r*0.1, x + pf.dx*c.scale, y + pf.dy*c.scale, r);
+      var warm = pal.dusk;
+      var core = warm > 0.4 ? 'rgba(255,220,190,' : 'rgba(255,255,255,';
+      var edge = warm > 0.4 ? 'rgba(255,170,150,0)' : 'rgba(230,240,255,0)';
+      if (pal.stars > 0.5) { core = 'rgba(40,44,80,'; edge = 'rgba(20,24,50,0)'; }
+      g.addColorStop(0, core + '0.95)');
+      g.addColorStop(1, edge);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x + pf.dx*c.scale, y + pf.dy*c.scale, r, 0, 6.2832);
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  var start = performance.now();
+  function frame(now) {
+    var time = (now - start) / 1000;
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - innerHeight;
+    var t = max > 0 ? Math.min(1, Math.max(0, (doc.scrollTop || document.body.scrollTop) / max)) : 0;
+    var pal = paletteAt(t);
+
+    // sky gradient
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, pal.top);
+    g.addColorStop(0.55, pal.mid);
+    g.addColorStop(1, pal.bot);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // stars at night
+    if (pal.stars > 0.02) {
+      stars.forEach(function (st) {
+        var tw = 0.5 + 0.5 * Math.sin(time * 2 + st.ph);
+        ctx.globalAlpha = pal.stars * (0.3 + 0.7 * tw);
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(st.x * W, st.y * H, st.r, 0, 6.2832);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    // sun / moon glow
+    var sunX = W * (0.5 + 0.28 * Math.sin((t - 0.2) * 2.4));
+    var sunY = pal.sunY * H;
+    var sg = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, H * 0.55);
+    var sunCol = pal.stars > 0.6 ? 'rgba(220,228,255,' : (pal.dusk > 0.4 ? 'rgba(255,196,120,' : 'rgba(255,248,220,');
+    sg.addColorStop(0, sunCol + '0.9)');
+    sg.addColorStop(0.18, sunCol + '0.45)');
+    sg.addColorStop(1, sunCol + '0)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(0, 0, W, H);
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, pal.stars > 0.6 ? 26 : 44, 0, 6.2832);
+    ctx.fillStyle = pal.stars > 0.6 ? 'rgba(235,240,255,0.95)' : 'rgba(255,252,235,0.95)';
+    ctx.fill();
+
+    // god rays during golden hour
+    if (pal.dusk > 0.15 && pal.stars < 0.6) {
+      ctx.save();
+      ctx.translate(sunX, sunY);
+      ctx.globalAlpha = pal.dusk * 0.35;
+      for (var r = 0; r < 7; r++) {
+        ctx.rotate(0.9 + Math.sin(time * 0.1 + r) * 0.002);
+        var rg = ctx.createLinearGradient(0, 0, 0, H);
+        rg.addColorStop(0, 'rgba(255,220,160,0.5)');
+        rg.addColorStop(1, 'rgba(255,220,160,0)');
+        ctx.fillStyle = rg;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-26 - r*8, H);
+        ctx.lineTo(26 + r*8, H);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+
+    // cloud layers back to front
+    for (var L = 0; L < 3; L++) {
+      layers[L].forEach(function (c) { drawCloud(c, L, pal, t, time); });
+    }
+
+    // birds, only in daylight
+    if (pal.stars < 0.4) {
+      ctx.strokeStyle = pal.dusk > 0.4 ? 'rgba(40,20,40,0.8)' : 'rgba(30,40,70,0.7)';
+      ctx.lineWidth = 1.6;
+      birds.forEach(function (bd) {
+        var bx = ((bd.x + time * bd.v) % 1.1 - 0.05) * W;
+        var by = bd.y * H + Math.sin(time + bd.ph) * 8;
+        var flap = Math.sin(time * 6 + bd.ph) * bd.s * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(bx - bd.s, by);
+        ctx.quadraticCurveTo(bx - bd.s * 0.4, by - bd.s * 0.5 - flap, bx, by);
+        ctx.quadraticCurveTo(bx + bd.s * 0.4, by - bd.s * 0.5 - flap, bx + bd.s, by);
+        ctx.stroke();
+      });
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
